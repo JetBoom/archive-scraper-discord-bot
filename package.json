@@ -1,0 +1,24 @@
+{
+  "name": "4chan-discord-server-scraper",
+  "version": "1.0.0",
+  "description": "Discord bot that posts all discord.gg invites posted on 4chan in to your own server as well",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js"
+  },
+  "keywords": [
+    "discord",
+    "4chan",
+    "bot",
+    "invite",
+    "scraper"
+  ],
+  "author": "williammoodhe@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "node-html-parser": "^6.1.6"
+  }
+}
