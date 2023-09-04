@@ -1,24 +1,27 @@
-import { parse as parseHTML, HTMLElement } from 'node-html-parser'
+import {
+    parse as parseHTML,
+    HTMLElement,
+} from 'node-html-parser'
 
-const dayLimit = parseInt(process.env.SEARCH_DAYS)
-const archiveSite = process.env.ARCHIVE_SITE
-const boards = process.env.SEARCH_BOARDS.split(',')
+const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
+    , { ARCHIVE_SITE } = process.env
+    , SITE_BOARDS = process.env.SEARCH_BOARDS.split(',')
 
 const msInDay = 1000 * 60 * 60 * 24
 const searchText = encodeURIComponent('https://discord.gg/')
 
 export async function scrapeArchiveInviteLinks(): Promise<string[]> {
     const startDate = new Date()
-    startDate.setTime(startDate.getTime() - msInDay * dayLimit)
+    startDate.setTime(startDate.getTime() - msInDay * SEARCH_DAYS)
     const startDateString = startDate.toISOString().split('T')[0]
 
     let page = 1
         , discordInvites = []
 
-    while (true) {
-        const url = `${archiveSite}/_/search/boards/${boards.join('.')}/text/${searchText}/start/${startDateString}/page/${page}/`
+    console.debug('Scraping started')
 
-        console.debug('Scraping page %d using URL %s', page, url)
+    while (true) {
+        const url = `${ARCHIVE_SITE}/_/search/boards/${SITE_BOARDS.join('.')}/text/${searchText}/start/${startDateString}/order/asc/page/${page}/`
 
         let root: HTMLElement
 
@@ -45,7 +48,7 @@ export async function scrapeArchiveInviteLinks(): Promise<string[]> {
     // Get rid of duplicates.
     discordInvites = Array.from(new Set(discordInvites).values())
 
-    console.debug('Scrape finished with %d invites', discordInvites.length)
+    console.debug('Scraped up to page %d with %d unique invites', page, discordInvites.length)
 
     return discordInvites
 }

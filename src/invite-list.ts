@@ -3,7 +3,6 @@ import {
     readFileSync,
     existsSync,
 } from 'fs'
-
 import type { Invite } from './types/invite'
 
 export class InviteList {
@@ -70,6 +69,8 @@ export class InviteList {
         }
 
         if (newlyAdded.length > 0) this.saveInviteList()
+
+        console.info('First time seeing %d new invites', newlyAdded.length)
 
         return newlyAdded
     }
