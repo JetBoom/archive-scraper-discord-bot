@@ -26,7 +26,7 @@ if (DISCORD_TOKEN) {
 
 const delay = WAIT_MINUTES * 1000 * 60
 async function scrapeAndSaveTimer() {
-    const scrapedInvites = await scrapeArchiveInviteLinks()
+    const scrapedInvites = await scrapeArchiveInviteLinks({ firstTime: inviteList.list.size === 0 })
     const newInvites = inviteList.addInvites(scrapedInvites)
 
     if (bot) {
