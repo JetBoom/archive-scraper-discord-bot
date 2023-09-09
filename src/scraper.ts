@@ -11,18 +11,24 @@ const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
 
 const msInDay = 1000 * 60 * 60 * 24
     , searchText = encodeURIComponent('https://discord.gg/')
-    , matchRegex = /discord\.gg\/([a-zA-Z0-9-_]+)$/
+    , matchRegex = /discord\.gg\/([a-zA-Z0-9-_\w]+)/m
 
+/** @throws */
 function extractInviteFromPost(post: HTMLElement) : IInvite | null {
-    const inviteCode = post.querySelector('a[href*="https://discord.gg/"]')?.getAttribute('href').match(matchRegex)?.[1]
-    if (!inviteCode) return null
+    //const href = post.querySelector('a[href*="https://discord.gg/"]')?.getAttribute('href')
+    //console.log('href', href)
+    const inviteCode = post.querySelector('div.text').innerHTML.match(matchRegex)?.[1]
+    if (!inviteCode) {
+        console.warn('No invite code found in post %s', post.id)
+        return
+    }
 
     const invite: IInvite = {
         inviteCode,
         postNumber: parseInt(post.getAttribute('id')),
         firstSeen: new Date(),
         postBoard: post.getAttribute('data-board'),
-        postBody: post.querySelector('div.post').text,
+        postBody: post.querySelector('div.text').innerHTML,
     }
 
     return invite
@@ -66,9 +72,13 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
         // Extract all discord invite links from the page.
         const posts = root.querySelectorAll('aside.posts > article[id]')
         for (const post of posts) {
-            const invite = extractInviteFromPost(post)
-            if (invite) {
-                discordInviteMap[invite.inviteCode] = invite
+            try {
+                const invite = extractInviteFromPost(post)
+                if (invite) {
+                    discordInviteMap.set(invite.inviteCode, invite)
+                }
+            } catch (e: any) {
+                console.warn('Could not parse post %s', post.getAttribute('id'))
             }
         }
 
