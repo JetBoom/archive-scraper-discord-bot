@@ -38,6 +38,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}): Pro
             root = parseHTML(text)
         } catch (e) {
             console.error('Error parsing archive: ', e.message)
+            break
         }
 
         // Extract all discord invite links from the page.
