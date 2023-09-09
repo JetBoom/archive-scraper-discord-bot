@@ -1,8 +1,10 @@
 import { Schema, model } from 'mongoose'
 import { IInvite } from '../types/invite'
+import { enforceAtomicityPlugin } from '../db'
 
-const inviteSchema = new Schema<IInvite>({
+const InviteSchema = new Schema<IInvite>({
     inviteCode: { type: String, _id: true }
 })
+InviteSchema.plugin(enforceAtomicityPlugin)
 
-export const InviteModel = model<IInvite>('invite', inviteSchema)
+export const InviteModel = model<IInvite>('invite', InviteSchema)
