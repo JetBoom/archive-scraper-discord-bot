@@ -6,6 +6,7 @@ import {
 } from './invite-list'
 import { Bot } from './bot'
 import { connectToDatabase } from './db'
+import { migrate } from './migration'
 
 const {
         DISCORD_TOKEN,
@@ -31,6 +32,8 @@ export class App {
 
     static async start() : Promise<void> {
         await connectToDatabase()
+
+        await migrate()
 
         if (DISCORD_TOKEN) {
             App.DiscordBot = new Bot(DISCORD_TOKEN, DISCORD_ANNOUNCE_CHANNEL_ID)
