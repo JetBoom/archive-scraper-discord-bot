@@ -2,6 +2,7 @@ import {
     parse as parseHTML,
     HTMLElement,
 } from 'node-html-parser'
+import { IInvite } from './types/invite'
 
 const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
     , SEARCH_DAYS_WHEN_EMPTY = parseInt(process.env.SEARCH_DAYS_WHEN_EMPTY ?? process.env.SEARCH_DAYS)
@@ -9,23 +10,44 @@ const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
     , SITE_BOARDS = process.env.SEARCH_BOARDS.split(',')
 
 const msInDay = 1000 * 60 * 60 * 24
-const searchText = encodeURIComponent('https://discord.gg/')
+    , searchText = encodeURIComponent('https://discord.gg/')
+    , matchRegex = /discord\.gg\/([a-zA-Z0-9-_]+)$/
+
+function extractInviteFromPost(post: HTMLElement) : IInvite | null {
+    const inviteCode = post.querySelector('a[href*="https://discord.gg/"]')?.getAttribute('href').match(matchRegex)?.[1]
+    if (!inviteCode) return null
+
+    const invite: IInvite = {
+        inviteCode,
+        postNumber: parseInt(post.getAttribute('id')),
+        firstSeen: new Date(),
+        postBoard: post.getAttribute('data-board'),
+        postBody: post.querySelector('div.post').text,
+    }
+
+    return invite
+}
+
+function getSearchStartDateStr(firstTime?: boolean) : string {
+    const startDate = new Date()
+    const searchDays = firstTime ? SEARCH_DAYS_WHEN_EMPTY : SEARCH_DAYS
+
+    startDate.setTime(startDate.getTime() - msInDay * searchDays)
+
+    return startDate.toISOString().split('T')[0]
+}
 
 interface ScrapeOptions {
     firstTime?: boolean
 }
 
-export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}): Promise<string[]> {
-    const startDate = new Date()
-    const searchDays = options.firstTime ? SEARCH_DAYS_WHEN_EMPTY : SEARCH_DAYS
-    startDate.setTime(startDate.getTime() - msInDay * searchDays)
-    const startDateString = startDate.toISOString().split('T')[0]
-
-    let page = 1
-        , discordInvites = []
+export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Promise<IInvite[]> {
+    const startDateString = getSearchStartDateStr(options.firstTime)
+    const discordInviteMap = new Map<string, IInvite>()
 
     console.debug('Scraping started')
 
+    let page = 1
     while (true) {
         const url = `${ARCHIVE_SITE}/_/search/boards/${SITE_BOARDS.join('.')}/text/${searchText}/start/${startDateString}/order/asc/page/${page}/`
 
@@ -42,9 +64,13 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}): Pro
         }
 
         // Extract all discord invite links from the page.
-        discordInvites = discordInvites.concat(
-            root.querySelectorAll('a[href*="https://discord.gg/"]').map(item => item.getAttribute('href'))
-        )
+        const posts = root.querySelectorAll('aside.posts > article[id]')
+        for (const post of posts) {
+            const invite = extractInviteFromPost(post)
+            if (invite) {
+                discordInviteMap[invite.inviteCode] = invite
+            }
+        }
 
         // Done with all the pages?
         if (root.querySelector('div.paginate > ul > li.next.disabled')) break
@@ -52,8 +78,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}): Pro
         ++page
     }
 
-    // Get rid of duplicates.
-    discordInvites = Array.from(new Set(discordInvites).values())
+    const discordInvites = Array.from(discordInviteMap.values())
 
     console.debug('Scraped up to page %d with %d unique invites', page, discordInvites.length)
 

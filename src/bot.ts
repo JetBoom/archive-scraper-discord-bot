@@ -4,19 +4,19 @@ import {
     GatewayIntentBits,
     TextChannel
 } from 'discord.js'
-import type { Invite } from './types/invite'
+import { IInvite } from './types/invite'
+import { wait } from './util'
 
-function wait(time: number): Promise<void> {
-    return new Promise<void>(resolve => {
-        setTimeout(resolve, time)
-    })
-}
+const invitesPerMessage = 10
+    , messageWaitTimeMs = 10000
 
 export class Bot {
     client: Client
+    token: string
     announceChannelId: string
 
-    constructor(token: string, channelId: string, onReady?: Function) {
+    constructor(token: string, channelId: string) {
+        this.token = token
         this.announceChannelId = channelId
 
         this.client = new Client({
@@ -24,28 +24,35 @@ export class Bot {
                 GatewayIntentBits.Guilds,
             ]
         })
-
-        this.client.once(Events.ClientReady, c => {
-            console.log('Bot logged in as', c.user.tag)
-
-            if (onReady) onReady()
+    }
+    
+    start() : Promise<void> {
+        return new Promise((resolve) => {
+            this.client.once(Events.ClientReady, c => {
+                console.log('Bot logged in as', c.user.tag)
+    
+                resolve()
+            })
+    
+            this.client.login(this.token)
         })
-
-        this.client.login(token)
     }
 
-    async broadcastNewInvites(invites: Invite[]) {
+    async broadcastNewInvites(invites: IInvite[]) : Promise<void> {
         if (invites.length === 0) return
 
         const channel = this.client.channels.cache.get(this.announceChannelId) as TextChannel
         if (!channel) return
 
-        const numPerMessage = 10
-        for (let i=0; i < invites.length; i += numPerMessage) {
-            await channel.send(invites.slice(i, i + numPerMessage).join('\n'))
+        for (let i=0; i < invites.length; i += invitesPerMessage) {
+            await channel.send(
+                invites.slice(i, i + invitesPerMessage)
+                .map(invite => `https://discord.gg/${invite.inviteCode}`)
+                .join('\n')
+            )
 
             // In case discord throttles invite messages, which it probably does since this is essentially invite spam
-            await wait(5000)
+            await wait(messageWaitTimeMs)
         }
     }
 }

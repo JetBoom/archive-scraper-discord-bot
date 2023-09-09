@@ -1,77 +1,37 @@
-import {
-    writeFileSync,
-    readFileSync,
-    existsSync,
-} from 'fs'
-import type { Invite } from './types/invite'
+import { IInvite } from './types/invite'
+import { InviteModel } from './models/invite'
 
-export class InviteList {
-    fileLocation: string
-    list: Set<Invite>
+export async function getIsEmptyDatabase() : Promise<boolean> {
+    const found = await InviteModel.findOne({})
+    return !found
+}
 
-    constructor(location: string) {
-        this.fileLocation = location
-        this.list = new Set()
-    }
+export async function checkInvitesExist(inviteCodes: string[]) : Promise<Record<string, boolean>> {
+    const invites = await InviteModel
+        .find({ inviteCode: { $in: inviteCodes } }, 'inviteCode')
+        .lean()
+        .limit(inviteCodes.length)
+        .exec()
+    
+    const exists = {}
+    for (let num of inviteCodes) exists[num] = false
+    for (let result of invites) exists[result.inviteCode] = true
 
-    saveInviteList(): boolean {
-        try {
-            writeFileSync(
-                this.fileLocation,
-                JSON.stringify(
-                    Array.from(this.list),
-                    null,
-                    2
-                ),
-                { encoding: 'utf-8' }
-            )
+    return exists
+}
 
-            return true
-        } catch (e) {
-            console.error('Error writing %s: %s', this.fileLocation, e.message)
+export async function addInvitesToDatabase(invites: IInvite[]) : Promise<IInvite[]> {
+    const exists = await checkInvitesExist(invites.map(invite => invite.inviteCode))
 
-            return false
-        }
-    }
+    invites = invites.filter(invite => !exists[invite.inviteCode])
 
-    loadInviteList(): boolean {
-        try {
-            if (!existsSync(this.fileLocation)) return true
+    const writeResult = await InviteModel.bulkWrite(
+        invites.map(invite => ({
+            insertOne: { document: invite }
+        }))
+    )
 
-            this.list = new Set(JSON.parse(
-                readFileSync(
-                    this.fileLocation,
-                    { encoding: 'utf-8' }
-                )
-            ))
+    console.info('First time seeing %d new invites', writeResult.insertedCount)
 
-            return true
-        } catch (e) {
-            console.error('Error reading %s: %s', this.fileLocation, e.message)
-
-            return false
-        }
-    }
-
-    getInvites(): Invite[] {
-        return Array.from(this.list)
-    }
-
-    /** Adds invites to the database and returns any invites that were not previously in the list */
-    addInvites(invites: Invite[]): Invite[] {
-        const newlyAdded: Invite[] = []
-
-        for (const invite of invites) {
-            if (!this.list.has(invite)) {
-                this.list.add(invite)
-                newlyAdded.push(invite)
-            }
-        }
-
-        if (newlyAdded.length > 0) this.saveInviteList()
-
-        console.info('First time seeing %d new invites', newlyAdded.length)
-
-        return newlyAdded
-    }
+    return invites
 }
