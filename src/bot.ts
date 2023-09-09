@@ -47,7 +47,7 @@ export class Bot {
         for (let i=0; i < invites.length; i += invitesPerMessage) {
             await channel.send(
                 invites.slice(i, i + invitesPerMessage)
-                .map(invite => `https://discord.gg/${invite.inviteCode}`)
+                .map(invite => `${invite.postBoard}/${invite.postNumber} - https://discord.gg/${invite.inviteCode}`)
                 .join('\n')
             )
 
