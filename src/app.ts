@@ -11,7 +11,6 @@ import { log } from './log'
 
 const {
         DISCORD_TOKEN,
-        DISCORD_ANNOUNCE_CHANNEL_ID,
         DB_HOST,
     } = process.env
     , WAIT_MINUTES = parseInt(process.env.WAIT_MINUTES)
@@ -37,7 +36,7 @@ export class App {
         await migrate()
 
         if (DISCORD_TOKEN) {
-            App.DiscordBot = new Bot(DISCORD_TOKEN, DISCORD_ANNOUNCE_CHANNEL_ID)
+            App.DiscordBot = new Bot(DISCORD_TOKEN)
             await App.DiscordBot.start()
         } else {
             log.warn('No DISCORD_TOKEN found, not making a bot.')

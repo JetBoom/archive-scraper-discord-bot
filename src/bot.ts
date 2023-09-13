@@ -10,7 +10,10 @@ import { IInvite } from './types/invite'
 import { wait } from './util'
 import { AdminCommands } from './admincommands'
 
-const { DISCORD_BOT_OWNER } = process.env
+const {
+    DISCORD_BOT_OWNER,
+    DISCORD_ANNOUNCE_CHANNEL_NAME,
+} = process.env
 
 const invitesPerMessage = 10
     , messageWaitTimeMs = 5000
@@ -18,11 +21,9 @@ const invitesPerMessage = 10
 export class Bot {
     client: Client
     token: string
-    announceChannelId: string
 
-    constructor(token: string, channelId: string) {
+    constructor(token: string) {
         this.token = token
-        this.announceChannelId = channelId
 
         this.client = new Client({
             intents: [
@@ -72,7 +73,7 @@ export class Bot {
 
         const guilds = this.client.guilds.cache.values()
         for (const guild of guilds) {
-            const channel = guild.channels.cache.find(channel => channel.name === 'discord-invites')
+            const channel = guild.channels.cache.find(channel => channel.name === DISCORD_ANNOUNCE_CHANNEL_NAME)
             if (channel && channel.isTextBased)
                 channels.push(channel as TextChannel)
         }
