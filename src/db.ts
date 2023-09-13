@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { log } from './log'
+import { wait } from './util'
 
 const {
     DB_USER,
@@ -16,16 +17,26 @@ export function enforceAtomicityPlugin(schema: mongoose.Schema, options: mongoos
 }
 
 export async function connectToDatabase() : Promise<typeof mongoose> {
-    let uri: string = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_COLLECTION}`
+    const uri: string = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_COLLECTION}`
 
-    log.info('Connecting to database...')
+    let connection: typeof mongoose
 
-    const connection = await mongoose.connect(uri, {
-        retryWrites: true,
-        writeConcern: { w: 'majority' },
-    })
+    while (!connection) {
+        log.info('Connecting to database...')
 
-    log.info('Connected to database.')
-    
+        try {
+            connection = await mongoose.connect(uri, {
+                retryWrites: true,
+                writeConcern: { w: 'majority' },
+            })
+        } catch (error: any) {
+            log.error('Failed to connect to database, will retry.')
+
+            await wait(5000)
+        }
+
+        log.info('Connected to database.')
+    }
+
     return connection
 }
