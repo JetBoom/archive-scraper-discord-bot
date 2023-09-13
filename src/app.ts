@@ -17,12 +17,12 @@ const {
     , WAIT_MINUTES = parseInt(process.env.WAIT_MINUTES)
 
 if (!DB_HOST) {
-    log.error('You need to setup mongodb variables in .env')
+    log.fatal('You need to setup mongodb variables in .env')
     process.exit(1)
 }
 
 if (Number.isNaN(WAIT_MINUTES) || WAIT_MINUTES < 0) {
-    log.error('You have WAIT_MINUTES not set correctly!')
+    log.fatal('You have WAIT_MINUTES not set correctly!')
     process.exit(2)
 }
 
