@@ -1,6 +1,6 @@
-import { IInvite } from './types/invite'
-import { InviteModel } from './models/invite'
-import { log } from './log'
+import { IInvite } from '~/types/invite'
+import { InviteModel } from '~/models/invite'
+import { log } from '~/log'
 
 export async function getIsEmptyDatabase() : Promise<boolean> {
     const found = await InviteModel.findOne({})

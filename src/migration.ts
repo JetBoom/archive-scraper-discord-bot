@@ -1,8 +1,8 @@
 import { existsSync } from 'fs'
 import { readFile, rm } from 'fs/promises'
-import { IInvite } from './types/invite'
-import { addInvitesToDatabase } from './invite-list'
-import { log } from './log'
+import { IInvite } from '~/types/invite'
+import { addInvitesToDatabase } from '~/invite-list'
+import { log } from '~/log'
 
 const matchRegex = /discord\.gg\/([a-zA-Z0-9-_]+)$/
 

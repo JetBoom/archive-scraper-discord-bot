@@ -2,8 +2,8 @@ import {
     parse as parseHTML,
     HTMLElement,
 } from 'node-html-parser'
-import { log } from './log'
-import { IInvite } from './types/invite'
+import { log } from '~/log'
+import { IInvite } from '~/types/invite'
 
 const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
     , SEARCH_DAYS_WHEN_EMPTY = parseInt(process.env.SEARCH_DAYS_WHEN_EMPTY || process.env.SEARCH_DAYS)

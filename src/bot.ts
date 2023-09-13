@@ -5,10 +5,10 @@ import {
     Message,
     TextChannel
 } from 'discord.js'
-import { log } from './log'
-import { IInvite } from './types/invite'
-import { wait } from './util'
-import { AdminCommands } from './admincommands'
+import { log } from '~/log'
+import { IInvite } from '~/types/invite'
+import { wait } from '~/util'
+import { AdminCommands } from '~/admincommands'
 
 const {
     DISCORD_BOT_OWNER,

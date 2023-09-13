@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import { log } from './log'
-import { wait } from './util'
+import { log } from '~/log'
+import { wait } from '~/util'
 
 const {
     DB_USER,

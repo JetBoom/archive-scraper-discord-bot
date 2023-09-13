@@ -1,13 +1,13 @@
 import 'dotenv-flow/config'
-import { scrapeArchiveInviteLinks } from './scraper'
+import { scrapeArchiveInviteLinks } from '~/scraper'
 import {
     addInvitesToDatabase,
     getIsEmptyDatabase,
-} from './invite-list'
-import { Bot } from './bot'
-import { connectToDatabase } from './db'
-import { migrate } from './migration'
-import { log } from './log'
+} from '~/invite-list'
+import { Bot } from '~/bot'
+import { connectToDatabase } from '~/db'
+import { migrate } from '~/migration'
+import { log } from '~/log'
 
 const {
         DISCORD_TOKEN,
