@@ -2,16 +2,17 @@ import { existsSync } from 'fs'
 import { readFile, rm } from 'fs/promises'
 import { IInvite } from './types/invite'
 import { addInvitesToDatabase } from './invite-list'
+import { log } from './log'
 
 const matchRegex = /discord\.gg\/([a-zA-Z0-9-_]+)$/
 
 export async function migrate() {
     if (!existsSync('./invite-db.json')) {
-        console.log('No invites DB file found to migrate from.')
+        log.debug('No invites DB file found to migrate from, skipping.')
         return
     }
 
-    console.log('Migrating old invite DB')
+    log.info('Migrating old invite DB')
 
     const file = await readFile('./invite-db.json')
     const inviteURLs = JSON.parse(file.toString('utf-8'))
@@ -36,5 +37,5 @@ export async function migrate() {
 
     await rm('./invite-db.json')
 
-    console.log('Migrated old db file successfully (%d items).', invites.length)
+    log.info('Migrated old db file successfully (%d items).', invites.length)
 }

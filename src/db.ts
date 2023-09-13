@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { log } from './log'
 
 const {
     DB_USER,
@@ -17,14 +18,14 @@ export function enforceAtomicityPlugin(schema: mongoose.Schema, options: mongoos
 export async function connectToDatabase() : Promise<typeof mongoose> {
     let uri: string = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_COLLECTION}`
 
-    console.log('Connecting to database...')
+    log.info('Connecting to database...')
 
     const connection = await mongoose.connect(uri, {
         retryWrites: true,
         writeConcern: { w: 'majority' },
     })
 
-    console.log('Connected to database.')
+    log.info('Connected to database.')
     
     return connection
 }

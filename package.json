@@ -23,6 +23,7 @@
     "discord.js": "^14.13.0",
     "dotenv-flow": "^3.3.0",
     "mongoose": "^7.5.0",
-    "node-html-parser": "^6.1.6"
+    "node-html-parser": "^6.1.6",
+    "pino": "7.0.0-rc.9"
   }
 }

@@ -2,10 +2,11 @@ import {
     parse as parseHTML,
     HTMLElement,
 } from 'node-html-parser'
+import { log } from './log'
 import { IInvite } from './types/invite'
 
 const SEARCH_DAYS = parseInt(process.env.SEARCH_DAYS)
-    , SEARCH_DAYS_WHEN_EMPTY = parseInt(process.env.SEARCH_DAYS_WHEN_EMPTY ?? process.env.SEARCH_DAYS)
+    , SEARCH_DAYS_WHEN_EMPTY = parseInt(process.env.SEARCH_DAYS_WHEN_EMPTY || process.env.SEARCH_DAYS)
     , { ARCHIVE_SITE } = process.env
     , SITE_BOARDS = process.env.SEARCH_BOARDS.split(',')
 
@@ -15,11 +16,9 @@ const msInDay = 1000 * 60 * 60 * 24
 
 /** @throws */
 function extractInviteFromPost(post: HTMLElement) : IInvite | null {
-    //const href = post.querySelector('a[href*="https://discord.gg/"]')?.getAttribute('href')
-    //console.log('href', href)
     const inviteCode = post.querySelector('div.text').innerHTML.match(matchRegex)?.[1]
     if (!inviteCode) {
-        console.warn('No invite code found in post %s', post.id)
+        log.warn('No invite code found in post %s', post.id)
         return
     }
 
@@ -51,7 +50,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
     const startDateString = getSearchStartDateStr(options.firstTime)
     const discordInviteMap = new Map<string, IInvite>()
 
-    console.debug('Scraping started')
+    log.debug('Scraping started')
 
     let page = 1
     while (true) {
@@ -65,7 +64,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
 
             root = parseHTML(text)
         } catch (e) {
-            console.error('Error parsing archive: ', e.message)
+            log.error('Error parsing archive: ', e.message)
             break
         }
 
@@ -74,11 +73,10 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
         for (const post of posts) {
             try {
                 const invite = extractInviteFromPost(post)
-                if (invite) {
+                if (invite)
                     discordInviteMap.set(invite.inviteCode, invite)
-                }
             } catch (e: any) {
-                console.warn('Could not parse post %s', post.getAttribute('id'))
+                log.warn('Could not parse post %s', post.getAttribute('id'))
             }
         }
 
@@ -90,7 +88,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
 
     const discordInvites = Array.from(discordInviteMap.values())
 
-    console.debug('Scraped up to page %d with %d unique invites', page, discordInvites.length)
+    log.debug('Scraped up to page %d with %d unique invites', page, discordInvites.length)
 
     return discordInvites
 }

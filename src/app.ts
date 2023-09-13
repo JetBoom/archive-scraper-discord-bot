@@ -7,6 +7,7 @@ import {
 import { Bot } from './bot'
 import { connectToDatabase } from './db'
 import { migrate } from './migration'
+import { log } from './log'
 
 const {
         DISCORD_TOKEN,
@@ -16,12 +17,12 @@ const {
     , WAIT_MINUTES = parseInt(process.env.WAIT_MINUTES)
 
 if (!DB_HOST) {
-    console.error('You need to setup mongodb variables in .env')
+    log.error('You need to setup mongodb variables in .env')
     process.exit(1)
 }
 
 if (Number.isNaN(WAIT_MINUTES) || WAIT_MINUTES < 0) {
-    console.error('You have WAIT_MINUTES not set correctly!')
+    log.error('You have WAIT_MINUTES not set correctly!')
     process.exit(2)
 }
 
@@ -39,7 +40,7 @@ export class App {
             App.DiscordBot = new Bot(DISCORD_TOKEN, DISCORD_ANNOUNCE_CHANNEL_ID)
             await App.DiscordBot.start()
         } else {
-            console.warn('No DISCORD_TOKEN found, not making a bot.')
+            log.warn('No DISCORD_TOKEN found, not making a bot.')
         }
 
         App.scrapeAndSaveTimer()

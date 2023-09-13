@@ -1,5 +1,6 @@
 import { IInvite } from './types/invite'
 import { InviteModel } from './models/invite'
+import { log } from './log'
 
 export async function getIsEmptyDatabase() : Promise<boolean> {
     const found = await InviteModel.findOne({})
@@ -33,7 +34,7 @@ export async function addInvitesToDatabase(invites: IInvite[]) : Promise<IInvite
         }))
     )
 
-    console.info('First time seeing %d new invites', writeResult.insertedCount)
+    log.info('First time seeing %d new invites', writeResult.insertedCount)
 
     return invites
 }
