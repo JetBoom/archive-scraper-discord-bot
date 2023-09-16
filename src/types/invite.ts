@@ -1,5 +1,5 @@
 export interface IInvite {
-    inviteCode: string
+    _id: string
     firstSeen: Date
     postBoard: string
     postBody: string

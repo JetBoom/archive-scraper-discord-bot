@@ -24,7 +24,7 @@ export async function migrate() {
         if (!inviteCode) continue
 
         const invite: IInvite = {
-            inviteCode,
+            _id: inviteCode,
             firstSeen: now,
             postBoard: 'unknown',
             postBody: '',

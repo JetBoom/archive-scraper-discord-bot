@@ -23,7 +23,7 @@ function extractInviteFromPost(post: HTMLElement) : IInvite | null {
     }
 
     const invite: IInvite = {
-        inviteCode,
+        _id: inviteCode,
         postNumber: parseInt(post.getAttribute('id')),
         firstSeen: new Date(),
         postBoard: post.getAttribute('data-board'),
@@ -64,7 +64,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
 
             root = parseHTML(text)
         } catch (e) {
-            log.error('Error parsing archive: ', e.message)
+            log.error('Error parsing archive: %s', e.message)
             break
         }
 
@@ -74,7 +74,7 @@ export async function scrapeArchiveInviteLinks(options: ScrapeOptions = {}) : Pr
             try {
                 const invite = extractInviteFromPost(post)
                 if (invite)
-                    discordInviteMap.set(invite.inviteCode, invite)
+                    discordInviteMap.set(invite._id, invite)
             } catch (e: any) {
                 log.warn('Could not parse post %s', post.getAttribute('id'))
             }

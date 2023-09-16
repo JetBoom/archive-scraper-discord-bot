@@ -12,23 +12,23 @@ export async function getIsEmptyDatabase() : Promise<boolean> {
 export async function checkInvitesExist(inviteCodes: string[]) : Promise<Record<string, boolean>> {
     const invites = await InviteModel
     .find()
-        .in('inviteCode', inviteCodes)
-    .select('inviteCode')
+        .in('_id', inviteCodes)
+    .select('_id')
     .limit(inviteCodes.length)
     .lean()
 
     const exists = {}
     for (let num of inviteCodes) exists[num] = false
-    for (let result of invites) exists[result.inviteCode] = true
+    for (let result of invites) exists[result._id] = true
 
     return exists
 }
 
 /** @throws */
 export async function addInvitesToDatabase(invites: IInvite[]) : Promise<IInvite[]> {
-    const exists = await checkInvitesExist(invites.map(invite => invite.inviteCode))
+    const exists = await checkInvitesExist(invites.map(invite => invite._id))
 
-    invites = invites.filter(invite => !exists[invite.inviteCode])
+    invites = invites.filter(invite => !exists[invite._id])
 
     const writeResult = await InviteModel
     .bulkWrite(

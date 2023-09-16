@@ -3,7 +3,11 @@ import { IInvite } from '~/types/invite'
 import { enforceAtomicityPlugin } from '~/db'
 
 const InviteSchema = new Schema<IInvite>({
-    inviteCode: { type: String, _id: true }
+    _id: { type: String, required: true, uninque: true, _id: true },
+    firstSeen: Date,
+    postBoard: String,
+    postBody: String,
+    postNumber: Number,
 })
 InviteSchema.plugin(enforceAtomicityPlugin)
 

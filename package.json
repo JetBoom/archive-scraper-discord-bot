@@ -1,10 +1,10 @@
 {
   "name": "4chan-discord-server-scraper",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Discord bot that posts all discord.gg invites posted on 4chan in to your own server as well",
   "main": "dist/app.js",
   "scripts": {
-    "start": "tsc && node dist/app.js"
+    "start": "tsc && tsc-alias && node dist/app.js"
   },
   "keywords": [
     "discord",
@@ -17,6 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.5.9",
+    "tsc-alias": "^1.8.7",
     "typescript": "^5.2.2"
   },
   "dependencies": {

@@ -47,18 +47,16 @@ export class App {
     }
 
     static async scrapeAndSaveTimer() : Promise<void> {
-        let newInvites: IInvite[]
-
         try {
             const firstTime = await getIsEmptyDatabase()
             const scrapedInvites = await scrapeArchiveInviteLinks({ firstTime })
-            newInvites = await addInvitesToDatabase(scrapedInvites)
+            const newInvites = await addInvitesToDatabase(scrapedInvites)
+
+            if (App.DiscordBot) {
+                await App.DiscordBot.broadcastNewInvites(newInvites)
+            }
         } catch (err: any) {
-            log.error('Error adding new invites to DB:', err.message)
-        }
-    
-        if (newInvites && App.DiscordBot) {
-            await App.DiscordBot.broadcastNewInvites(newInvites)
+            log.error('Error adding new invites to DB: %s', err.message)
         }
     
         setTimeout(App.scrapeAndSaveTimer, scrapeDelay)
