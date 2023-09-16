@@ -4,6 +4,7 @@ import {
     addInvitesToDatabase,
     getIsEmptyDatabase,
 } from '~/invite-list'
+import { IInvite } from './types/invite'
 import { Bot } from '~/bot'
 import { connectToDatabase } from '~/db'
 import { migrate } from '~/migration'
@@ -46,11 +47,17 @@ export class App {
     }
 
     static async scrapeAndSaveTimer() : Promise<void> {
-        const firstTime = await getIsEmptyDatabase()
-        const scrapedInvites = await scrapeArchiveInviteLinks({ firstTime })
-        const newInvites = await addInvitesToDatabase(scrapedInvites)
+        let newInvites: IInvite[]
+
+        try {
+            const firstTime = await getIsEmptyDatabase()
+            const scrapedInvites = await scrapeArchiveInviteLinks({ firstTime })
+            newInvites = await addInvitesToDatabase(scrapedInvites)
+        } catch (err: any) {
+            log.error('Error adding new invites to DB:', err.message)
+        }
     
-        if (App.DiscordBot) {
+        if (newInvites && App.DiscordBot) {
             await App.DiscordBot.broadcastNewInvites(newInvites)
         }
     

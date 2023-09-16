@@ -2,11 +2,13 @@ import { IInvite } from '~/types/invite'
 import { InviteModel } from '~/models/invite'
 import { log } from '~/log'
 
+/** @throws */
 export async function getIsEmptyDatabase() : Promise<boolean> {
     const found = await InviteModel.findOne({})
     return !found
 }
 
+/** @throws */
 export async function checkInvitesExist(inviteCodes: string[]) : Promise<Record<string, boolean>> {
     const invites = await InviteModel
     .find()
@@ -22,6 +24,7 @@ export async function checkInvitesExist(inviteCodes: string[]) : Promise<Record<
     return exists
 }
 
+/** @throws */
 export async function addInvitesToDatabase(invites: IInvite[]) : Promise<IInvite[]> {
     const exists = await checkInvitesExist(invites.map(invite => invite.inviteCode))
 
